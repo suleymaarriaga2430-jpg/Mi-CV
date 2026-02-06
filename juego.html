@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adivina el Número - Juego</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #d7cedd 0%, #e1b9ec 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .game-container {
+            background-color: rgb(213, 161, 175);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.395);
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #525a5b;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .game-info {
+            background-color: #ebd9e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .attempts-counter {
+            font-size: 1.3rem;
+            color: #ea5497;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .range-info {
+            font-size: 1.1rem;
+            color: #d378aa;
+            margin-bottom: 15px;
+        }
+        
+        .guess-form {
+            margin-bottom: 25px;
+        }
+        
+        .guess-input {
+            width: 200px;
+            padding: 15px;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 2px solid #260d2f;
+            border-radius: 10px;
+            margin-right: 10px;
+            transition: all 0.3s;
+        }
+        
+        .guess-input:focus {
+            outline: none;
+            border-color: #a36cb4;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .guess-button {
+            background-color: #ab9eaf;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .guess-button:hover {
+            background-color: #a282c2;
+        }
+        
+        .guess-button:disabled {
+            background-color: #9e8fa5;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hint {
+            background-color: #e7d2f4;
+            border: 1px solid #d9bcea;
+            color: #a174a6;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .previous-guesses {
+            background-color: #e1d6e1;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .previous-guesses h3 {
+            color: #df5487;
+            margin-bottom: 15px;
+        }
+        
+        .guesses-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            list-style-type: none;
+        }
+        
+        .guesses-list li {
+            background-color: #eb589c;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .restart-button {
+            background-color: #f57ec5;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: none;
+        }
+        
+        .restart-button:hover {
+            background-color: #ed65ad;
+        }
+        
+        .instructions {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+            color: #5c4e5d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 25px;
+            }
+            
+            .guess-input {
+                width: 100%;
+                margin-bottom: 15px;
+                margin-right: 0;
+            }
+            
+            .guess-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Adivina el Número</h1>
+        <p class="subtitle">Tienes 10 intentos para adivinar el número secreto entre 1 y 100</p>
+        
+        <div class="game-info">
+            <div class="attempts-counter">Intentos restantes: <span id="attempts">10</span></div>
+            <div class="range-info">El número está entre <strong>1</strong> y <strong>100</strong></div>
+        </div>
+        
+        <div class="guess-form">
+            <input type="number" id="guessInput" class="guess-input" min="1" max="100" placeholder="Tu número">
+            <button id="guessButton" class="guess-button">Adivinar</button>
+        </div>
+        
+        <div id="message" class="message">
+            ¡Ingresa tu primer intento!
+        </div>
+        
+        <div class="previous-guesses">
+            <h3>Números probados:</h3>
+            <ul id="guessesList" class="guesses-list">
+                <!-- Aquí aparecerán los números intentados -->
+            </ul>
+        </div>
+        
+        <button id="restartButton" class="restart-button">Jugar de nuevo</button>
+        
+        <div class="instructions">
+            <p><strong>Instrucciones:</strong> Escribe un número entre 1 y 100 en el campo de arriba y haz clic en "Adivinar". Te diré si te pasaste, te quedaste corto o acertaste.</p>
+        </div>
+    </div>
+
+    <script>
+        // Variables del juego
+        let secretNumber = Math.floor(Math.random() * 100) + 1;
+        let attemptsLeft = 10;
+        let previousGuesses = [];
+        let gameOver = false;
+
+        // Elementos del DOM
+        const guessInput = document.getElementById('guessInput');
+        const guessButton = document.getElementById('guessButton');
+        const restartButton = document.getElementById('restartButton');
+        const messageElement = document.getElementById('message');
+        const attemptsElement = document.getElementById('attempts');
+        const guessesListElement = document.getElementById('guessesList');
+
+        // Función para actualizar el mensaje
+        function updateMessage(text, type = 'hint') {
+            messageElement.textContent = text;
+            messageElement.className = `message ${type}`;
+        }
+
+        // Función para actualizar la lista de intentos
+        function updateGuessesList() {
+            guessesListElement.innerHTML = '';
+            previousGuesses.forEach(guess => {
+                const li = document.createElement('li');
+                li.textContent = guess;
+                guessesListElement.appendChild(li);
+            });
+        }
+
+        // Función para comprobar el intento del jugador
+        function checkGuess() {
+            if (gameOver) return;
+
+            const userGuess = parseInt(guessInput.value);
+
+            // Validar la entrada
+            if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
+                updateMessage('Por favor, ingresa un número válido entre 1 y 100.', 'error');
+                guessInput.value = '';
+                guessInput.focus();
+                return;
+            }
+
+            // Verificar si el número ya fue intentado
+            if (previousGuesses.includes(userGuess)) {
+                updateMessage(`¡Ya probaste el número ${userGuess}! Intenta con otro.`, 'error');
+                guessInput.value = '';
+                guessInput.focus();
+                return;
+            }
+
+            // Agregar a la lista de intentos
+            previousGuesses.push(userGuess);
+            attemptsLeft--;
+            
+            // Actualizar la interfaz
+            attemptsElement.textContent = attemptsLeft;
+            updateGuessesList();
+            
+            // Comprobar si el jugador acertó
+            if (userGuess === secretNumber) {
+                updateMessage(`¡Felicidades! ¡Adivinaste el número ${secretNumber} en ${10 - attemptsLeft} intentos!`, 'success');
+                endGame(true);
+                return;
+            }
+
+            // Dar pista si el número es mayor o menor
+            if (userGuess < secretNumber) {
+                updateMessage(`El número secreto es MAYOR que ${userGuess}. Te quedan ${attemptsLeft} intentos.`, 'hint');
+            } else {
+                updateMessage(`El número secreto es MENOR que ${userGuess}. Te quedan ${attemptsLeft} intentos.`, 'hint');
+            }
+
+            // Comprobar si se acabaron los intentos
+            if (attemptsLeft <= 0) {
+                updateMessage(`¡Se te acabaron los intentos! El número era ${secretNumber}. ¡Mejor suerte la próxima!`, 'error');
+                endGame(false);
+                return;
+            }
+
+            // Limpiar el campo de entrada y enfocarlo
+            guessInput.value = '';
+            guessInput.focus();
+        }
+
+        // Función para terminar el juego
+        function endGame(isWin) {
+            gameOver = true;
+            guessInput.disabled = true;
+            guessButton.disabled = true;
+            restartButton.style.display = 'inline-block';
+        }
+
+        // Función para reiniciar el juego
+        function restartGame() {
+            // Reiniciar variables del juego
+            secretNumber = Math.floor(Math.random() * 100) + 1;
+            attemptsLeft = 10;
+            previousGuesses = [];
+            gameOver = false;
+
+            // Reiniciar la interfaz
+            guessInput.disabled = false;
+            guessInput.value = '';
+            guessInput.focus();
+            guessButton.disabled = false;
+            restartButton.style.display = 'none';
+            attemptsElement.textContent = attemptsLeft;
+            updateMessage('¡Nuevo juego! Adivina el número entre 1 y 100.', 'hint');
+            guessesListElement.innerHTML = '';
+            
+            console.log('Número secreto (para pruebas):', secretNumber); // Solo para pruebas
+        }
+
+        // Event listeners
+        guessButton.addEventListener('click', checkGuess);
+        
+        guessInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                checkGuess();
+            }
+        });
+        
+        restartButton.addEventListener('click', restartGame);
+
+        // Inicializar el juego
+        updateMessage('¡Bienvenido! Adivina el número secreto entre 1 y 100.', 'hint');
+        guessInput.focus();
+        
+        // Mostrar el número secreto en consola para pruebas (quitar en producción)
+        console.log('Número secreto (para pruebas):', secretNumber);
+    </script>
+</body>
+</html>
